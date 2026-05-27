@@ -109,3 +109,22 @@ def main():
     conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("🍰 Хочу сладкого!"), want)],
         states={
+            Q1: [MessageHandler(filters.TEXT & ~filters.COMMAND, q1)],
+            Q2: [MessageHandler(filters.TEXT & ~filters.COMMAND, q2)],
+            Q3: [MessageHandler(filters.TEXT & ~filters.COMMAND, q3)],
+            Q4: [MessageHandler(filters.TEXT & ~filters.COMMAND, q4)],
+        },
+        fallbacks=[CommandHandler("start", start)]
+    )
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(conv)
+
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(send_reminder, "cron", hour=9, minute=0)
+    scheduler.start()
+
+    print("Бот запущен!")
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
