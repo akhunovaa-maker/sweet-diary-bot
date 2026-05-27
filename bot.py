@@ -78,33 +78,25 @@ async def q2(update, context):
 async def q3(update, context):
     choice = update.message.text
     if choice == "✏️ Другое":
-        await update.message.reply_text("Напиши куда пойдёшь 👇",
-            reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True))
+        await update.message.reply_text(
+            "Напиши куда пойдёшь 👇",
+            reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
+        )
         return Q3
     context.user_data["q3"] = choice
-    keyboard = [
-        ["☀️ Утро, разгоняюсь", "💼 Рабочий день"],
-        ["😴 Устал(а), нужна пауза", "🌙 Вечер дома"],
-        ["👥 Общий стол, угощаю", "✏️ Другое"]
-    ]
     await update.message.reply_text(
-        "Какая обстановка вокруг?",
-        reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+        "Как ты себя чувствуешь? Напиши своими словами — устал(а), хочу побаловать себя, просто к чаю, скучно и т.д.",
+        reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
     )
     return Q4
 
 async def q4(update, context):
-    choice = update.message.text
-    if choice == "✏️ Другое":
-        await update.message.reply_text("Опиши своими словами 👇",
-            reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True))
-        return Q4
-    context.user_data["q4"] = choice
+    context.user_data["q4"] = update.message.text
     name = update.effective_user.first_name or "Участник"
     username = f"@{update.effective_user.username}" if update.effective_user.username else f"id:{update.effective_user.id}"
     await context.bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"📝 {name} ({username})\n📍 {context.user_data.get('q1','?')}\n🍬 {context.user_data.get('q2','?')}\n🏪 {context.user_data.get('q3','?')}\n🌤 {context.user_data.get('q4','?')}"
+        text=f"📝 {name} ({username})\n📍 {context.user_data.get('q1','?')}\n🍬 {context.user_data.get('q2','?')}\n🏪 {context.user_data.get('q3','?')}\n💬 {context.user_data.get('q4','?')}"
     )
     keyboard = [["🍰 Хочу сладкого!"]]
     await update.message.reply_text(
@@ -117,22 +109,3 @@ def main():
     conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("🍰 Хочу сладкого!"), want)],
         states={
-            Q1: [MessageHandler(filters.TEXT & ~filters.COMMAND, q1)],
-            Q2: [MessageHandler(filters.TEXT & ~filters.COMMAND, q2)],
-            Q3: [MessageHandler(filters.TEXT & ~filters.COMMAND, q3)],
-            Q4: [MessageHandler(filters.TEXT & ~filters.COMMAND, q4)],
-        },
-        fallbacks=[CommandHandler("start", start)]
-    )
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(conv)
-
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(send_reminder, "cron", hour=9, minute=0)
-    scheduler.start()
-
-    print("Бот запущен!")
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()
