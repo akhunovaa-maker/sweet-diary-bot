@@ -80,7 +80,7 @@ async def q2(update, context):
         await update.message.reply_text("Напиши что делаешь 👇", reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True))
         return Q2_OTHER
     context.user_data["q2"] = update.message.text
-    keyboard = [["🧍 Один(а)", "👔 С коллегами"], ["👫 С друзьями", "👨‍👩‍👧 С семьёй"], ["✏️ Другое"]]
+    keyboard = [["🧍 Один", "👔 С коллегами"], ["👫 С друзьями", "👨‍👩‍👧 С семьёй"], ["✏️ Другое"]]
     await update.message.reply_text(
         "С кем ты?",
         reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
