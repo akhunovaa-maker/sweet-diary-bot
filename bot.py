@@ -6,7 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 TOKEN = "8818329273:AAHeCUTLNR-M4FdPt84P-LgCBlErLz5rNi4"
 ADMIN_ID = 534720549
 USERS_FILE = "users.json"
-Q1, Q2, Q3, Q4 = range(4)
+Q1, Q2, Q3, Q4, Q2_OTHER = range(5)
 
 def load_users():
     if os.path.exists(USERS_FILE):
@@ -55,7 +55,7 @@ async def want(update, context):
 
 async def q1(update, context):
     context.user_data["q1"] = update.message.text
-    keyboard = [["🎂 Торт/пирожное", "🍫 Шоколад"], ["🍪 Печенье/конфеты", "🤷 Что-нибудь сладкое"]]
+    keyboard = [["🎂 Торт/пирожное", "🍫 Шоколад"], ["🍪 Печенье/конфеты", "🤷 Что-нибудь сладкое"], ["✏️ Другое"]]
     await update.message.reply_text(
         "Чего именно хочется?",
         reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
@@ -63,6 +63,26 @@ async def q1(update, context):
     return Q2
 
 async def q2(update, context):
+    choice = update.message.text
+    if choice == "✏️ Другое":
+        await update.message.reply_text(
+            "Напиши что именно хочется 👇",
+            reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
+        )
+        return Q2_OTHER
+    context.user_data["q2"] = choice
+    keyboard = [
+        ["🏪 Магазин рядом", "🛵 Самокат"],
+        ["🍏 Вкусвилл", "🚕 Яндекс Доставка"],
+        ["⏳ Потерплю", "✏️ Другое"]
+    ]
+    await update.message.reply_text(
+        "Где скорее всего возьмёшь?",
+        reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+    )
+    return Q3
+
+async def q2_other(update, context):
     context.user_data["q2"] = update.message.text
     keyboard = [
         ["🏪 Магазин рядом", "🛵 Самокат"],
@@ -111,6 +131,7 @@ def main():
         states={
             Q1: [MessageHandler(filters.TEXT & ~filters.COMMAND, q1)],
             Q2: [MessageHandler(filters.TEXT & ~filters.COMMAND, q2)],
+            Q2_OTHER: [MessageHandler(filters.TEXT & ~filters.COMMAND, q2_other)],
             Q3: [MessageHandler(filters.TEXT & ~filters.COMMAND, q3)],
             Q4: [MessageHandler(filters.TEXT & ~filters.COMMAND, q4)],
         },
